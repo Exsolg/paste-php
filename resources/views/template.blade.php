@@ -10,8 +10,17 @@
     <body>
         <nav class="navbar navbar-light bg-light">
             <div class="container">
-                <a href="{{redirect('/')}}" class="navbar-brand mb-0 h1">PasteClone</a>
-                <a href="{{redirect('/')}}"><span class="btn btn-primary">New paste</span></a>
+                <a href="{{ url('/') }}" class="navbar-brand mb-0 h1">PasteClone</a>
+                <div class="navbar-nav-inline">
+                    @if(!Auth::check())
+                        <a href="{{ url('/login') }}" class="nav-item me-2">Login</a>
+                        <a href="{{ url('/register') }}" class="nav-item me-2">Sign Up</a>
+                    @else
+                        <a href="{{ url('/logout') }}" class="nav-item me-2">Logout</a>
+                    @endif
+
+                    <a href="{{ url('/') }}"><span class="btn btn-primary">New paste</span></a>
+                </div>
             </div>
         </nav>
         <div class="container">
