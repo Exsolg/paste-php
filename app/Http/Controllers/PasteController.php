@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Paste\StorePasteRequest;
 use App\Http\Services\Interfaces\PasteServiceInterface;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Http\Services\PasteService;
+use Barryvdh\Debugbar\Facades\Debugbar;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class PasteController extends Controller
@@ -16,6 +20,17 @@ class PasteController extends Controller
     public function getByHash($hash): View
     {
         $paste = $this->pasteService->getPasteByHash($hash);
-        return view('paste', ['paste' => $paste]);
+        return view('pastes.get', ['paste' => $paste]);
+    }
+
+    public function createPaste(): View
+    {
+        return view('pastes.create');
+    }
+
+    public function store(StorePasteRequest $request): RedirectResponse
+    {
+        $paste = $this->pasteService->createPaste($request);
+        return redirect('/paste/' . $paste->hash);
     }
 }

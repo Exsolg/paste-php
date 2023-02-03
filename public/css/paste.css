@@ -1,0 +1,15 @@
+.form-group.col-md-4 {
+    display: flex;
+    align-items: center;
+}
+
+.input-group{
+    width: 50%;
+}
+.input-group-addon{
+    width: 45%;
+    text-align: left;
+}
+.form-control {
+    width: 55%;
+}

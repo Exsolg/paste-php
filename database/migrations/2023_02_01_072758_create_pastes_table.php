@@ -19,9 +19,10 @@ return new class extends Migration
             $table->enum('access_type', ['public', 'unlisted', 'private'])->default('public');
             $table->foreignId('user_id')->nullable()->constrained()->cascadeOnDelete();
             $table->string('syntax')->nullable();
-            $table->string('hash')->unique();
-            $table->timestamp('expired_at')->nullable();
+            $table->string('hash')->nullable()->unique();
             $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
+            $table->timestamp('expired_at')->nullable();
         });
     }
 

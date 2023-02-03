@@ -6,5 +6,7 @@ use App\Models\Paste;
 
 interface PasteRepositoryInterface
 {
-    public function getPasteById(string $id): Paste;
+    public function get(string $id): Paste;
+    public function getByHash(string $hash);
+    public function add(array $data);
 }

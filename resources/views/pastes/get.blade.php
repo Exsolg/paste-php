@@ -8,7 +8,7 @@
 
 @section('content')
     <div>
-        <span>@if(!$paste->user_id) Guest @else {{ $paste->user()->name }} @endif</span>
+        <span>@if(!Auth::check()) Guest @else {{ $paste->user->name }} @endif</span>
         <span>Syntax: @if(!$paste->syntax) Text @else {{ $paste->syntax }} @endif</span>
         <span>Created at {{ $paste->created_at }}</span>
         @if($paste->expired_at) <span>Expired at {{ $paste->expired_at }}</span> @endif
