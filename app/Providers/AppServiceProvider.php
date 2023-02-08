@@ -2,10 +2,7 @@
 
 namespace App\Providers;
 
-use App\Http\Services\Interfaces\PasteServiceInterface;
-use App\Http\Services\PasteService;
-use App\Repositories\Interfaces\PasteRepositoryInterface;
-use App\Repositories\PasteRepository;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -27,6 +24,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        Paginator::useBootstrapFive();
     }
 }

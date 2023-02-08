@@ -10,7 +10,7 @@
     <form method="POST" action="{{ route('paste.store') }}">
         @csrf
 
-        <textarea class="form-control-plaintext bg-light" wrap="off" aria-required="true" name="paste"></textarea>
+        <textarea class="form-control-plaintext bg-light" wrap="soft" aria-required="true" name="paste"></textarea>
 
         <div class="my-2">
             <div class="input-group form-group col-md-4">

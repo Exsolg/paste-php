@@ -2,17 +2,19 @@
 
 namespace App\Http\Services;
 
-use App\Http\Requests\Paste\StorePasteRequest;
+use App\DTO\Paste\PasteCreationDTO;
+use App\Enums\Paste\AccessType;
 use App\Http\Services\Interfaces\PasteServiceInterface;
 use App\Models\Paste;
 use App\Repositories\Interfaces\PasteRepositoryInterface;
-use Barryvdh\Debugbar\Facades\Debugbar;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 
 class PasteService implements PasteServiceInterface
 {
     private PasteRepositoryInterface $pasteRepository;
+
     public function __construct(PasteRepositoryInterface $pasteRepository)
     {
         $this->pasteRepository = $pasteRepository;
@@ -22,19 +24,22 @@ class PasteService implements PasteServiceInterface
     {
         $paste = $this->pasteRepository->getByHash($hash);
 
-        if ($paste->access_type == 'private' and $paste->user_id != Auth::user()?->id) {
+        if ($paste->access_type == AccessType::PRIVATE and $paste->user_id != Auth::id()) {
             throw new ModelNotFoundException();
         }
 
         return $paste;
     }
 
-    public function createPaste(StorePasteRequest $request): Paste
+    public function createPaste(PasteCreationDTO $paste): Paste
     {
-        $validated = $request->validated();
+        $paste->userId = Auth::id();
 
-        $validated['userId'] = Auth::user()?->id;
+        return $this->pasteRepository->add($paste);
+    }
 
-        return $this->pasteRepository->add($validated);
+    public function list(int $pageSize = 10): LengthAwarePaginator
+    {
+        return $this->pasteRepository->getPaginationByUserId(Auth::id(), $pageSize);
     }
 }

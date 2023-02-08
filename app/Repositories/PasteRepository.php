@@ -2,9 +2,14 @@
 
 namespace App\Repositories;
 
+use App\DTO\Paste\PasteCreationDTO;
+use App\Helpers\Arrays;
 use App\Models\Paste;
 use App\Repositories\Interfaces\PasteRepositoryInterface;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 function hash(string $id): string
 {
@@ -17,14 +22,14 @@ function hash(string $id): string
     $md5 = substr($md5, $randomMd5Idx, 5);
     $base64 = substr($base64, $randomBase64Idx, 5);
 
-    return $md5 . $base64;
+    return $md5.$base64;
 }
 
 class PasteRepository implements PasteRepositoryInterface
 {
     private function isExpired(Paste $paste): bool
     {
-        if($paste->expired_at and strtotime($paste->expired_at) < strtotime(date('d-m-Y h:i:s'))) {
+        if ($paste->expired_at and strtotime($paste->expired_at) < strtotime(Carbon::now())) {
             return true;
         }
 
@@ -35,7 +40,7 @@ class PasteRepository implements PasteRepositoryInterface
     {
         $paste = Paste::findOrFail($id);
 
-        if($this->isExpired($paste)) {
+        if ($this->isExpired($paste)) {
             throw new ModelNotFoundException();
         }
 
@@ -46,27 +51,49 @@ class PasteRepository implements PasteRepositoryInterface
     {
         $paste = Paste::where('hash', $hash)->firstOrFail();
 
-        if($this->isExpired($paste)) {
+        if ($this->isExpired($paste)) {
             throw new ModelNotFoundException();
         }
 
         return $paste;
     }
 
-    public function add(array $data): Paste
+    public function add(PasteCreationDTO $paste): Paste
     {
-        $paste = Paste::create([
-            'paste' => $data['paste'],
-            'access_type' => $data['accessType'],
-            'user_id' => $data['userId'],
-            'syntax' => $data['syntax'],
-            'expired_at' => $data['expiredAt'],
-        ]);
+        $paste = $paste->toArray();
+        Arrays::keysToSnakeCase($paste);
 
+        $paste = Paste::create($paste);
         $paste->hash = hash($paste->id);
-
         $paste->save();
 
         return $paste;
+    }
+
+    public function getLastPublic(int $count = 10): Collection
+    {
+        return Paste::where('access_type', 'public')
+                            ->where('expired_at', '>', Carbon::now())
+                            ->orderBy('created_at', 'desc')
+                            ->limit($count)
+                            ->get();
+    }
+
+    public function getLastByUserId(string $userId, int $count = 10): Collection
+    {
+        return Paste::where('user_id', $userId)
+                            ->where('expired_at', '>', Carbon::now())
+                            ->orderBy('created_at', 'desc')
+                            ->limit($count)->get();
+    }
+
+    public function getPaginationByUserId(string $userId, int $pageSize = 10): LengthAwarePaginator
+    {
+        $pastes = Paste::where('user_id', $userId)
+                        ->where('expired_at', '>', Carbon::now())
+                        ->orderBy('created_at', 'desc')
+                        ->paginate($pageSize);
+
+        return $pastes->withQueryString();
     }
 }

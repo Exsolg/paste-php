@@ -2,10 +2,12 @@
 
 namespace App\Http\Requests\Paste;
 
+use App\Enums\Paste\AccessType;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Enum;
 
-function mapExpireDate($expirationTime): ?Carbon
+function mapExpireDate(string $expirationTime): ?Carbon
 {
     $date = Carbon::now();
 
@@ -26,13 +28,13 @@ class StorePasteRequest extends FormRequest
     {
         return [
             'paste' => 'required|string',
-            'accessType' => 'in:public,unlisted,private|string',
+            'accessType' => ['string', new Enum(AccessType::class)],
             'syntax' => 'max:30|string|nullable',
             'expiredAt' => 'date|nullable',
         ];
     }
 
-    protected function prepareForValidation()
+    protected function prepareForValidation(): void
     {
         $this->merge([
             'expiredAt' => mapExpireDate($this->expiredAt),
